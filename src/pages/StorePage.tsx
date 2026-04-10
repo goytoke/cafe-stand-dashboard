@@ -75,7 +75,15 @@ const StorePage: React.FC = () => {
           </div>
           <div className="grid grid-cols-3 gap-4">
             <div><label className="text-sm font-medium">Quantity</label><input type="number" required value={form.quantity} onChange={e => setForm({ ...form, quantity: e.target.value })} className="mt-1 w-full px-3 py-2.5 bg-secondary rounded-lg text-sm border border-border outline-none focus:ring-2 focus:ring-primary/30" /></div>
-            <div><label className="text-sm font-medium">Measurement</label><input required value={form.measurement} onChange={e => setForm({ ...form, measurement: e.target.value })} className="mt-1 w-full px-3 py-2.5 bg-secondary rounded-lg text-sm border border-border outline-none focus:ring-2 focus:ring-primary/30" /></div>
+            <div><label className="text-sm font-medium">Measurement</label>
+              <select required value={form.measurement} onChange={e => setForm({ ...form, measurement: e.target.value })} className="mt-1 w-full px-3 py-2.5 bg-secondary rounded-lg text-sm border border-border outline-none focus:ring-2 focus:ring-primary/30">
+                <option value="liter">Liter</option>
+                <option value="kg">Kg</option>
+                <option value="gram">Gram</option>
+                <option value="pieces">Pieces</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
             <div><label className="text-sm font-medium">Price per Unit</label><input type="number" required value={form.pricePerUnit} onChange={e => setForm({ ...form, pricePerUnit: e.target.value })} className="mt-1 w-full px-3 py-2.5 bg-secondary rounded-lg text-sm border border-border outline-none focus:ring-2 focus:ring-primary/30" /></div>
           </div>
           <div><label className="text-sm font-medium">Expired Date</label><input type="date" required value={form.expiredDate} onChange={e => setForm({ ...form, expiredDate: e.target.value })} className="mt-1 w-full px-3 py-2.5 bg-secondary rounded-lg text-sm border border-border outline-none focus:ring-2 focus:ring-primary/30" /></div>
@@ -84,12 +92,13 @@ const StorePage: React.FC = () => {
       )}
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-3 gap-6">
         {categories.map(c => (
           <button key={c} onClick={() => setActiveCategory(c)}
-            className={`stat-card text-center cursor-pointer transition-all ${activeCategory === c ? 'ring-2 ring-primary' : 'hover:shadow-panel'}`}>
-            <p className="text-xs text-muted-foreground">{c.charAt(0).toUpperCase() + c.slice(1)}s</p>
-            <p className="text-2xl font-heading font-bold mt-1">{counts[c]}</p>
+            className={`stat-card text-center cursor-pointer transition-all px-6 py-8 rounded-xl shadow-md ${activeCategory === c ? 'ring-2 ring-primary bg-primary/5 shadow-lg' : 'hover:shadow-lg'}`}>
+            <p className="text-sm text-muted-foreground font-medium">{c.charAt(0).toUpperCase() + c.slice(1)}s</p>
+            <p className="text-3xl font-heading font-bold mt-2">{counts[c]}</p>
+            <p className="text-xs text-muted-foreground mt-1">materials</p>
           </button>
         ))}
       </div>
