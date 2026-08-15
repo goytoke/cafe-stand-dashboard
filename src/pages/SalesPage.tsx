@@ -43,6 +43,7 @@ const SalesPage: React.FC = () => {
     { key: 'today' as const, label: "Today's Sales" },
     { key: 'most' as const, label: 'Most Sales' },
     { key: 'least' as const, label: 'Least Sales' },
+    { key: 'discount' as const, label: 'Discount' },
   ];
 
   const displayData = activeTab === 'most' ? mostSold : activeTab === 'least' ? leastSold : [];
