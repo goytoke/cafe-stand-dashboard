@@ -7,7 +7,9 @@ const COLORS = ['hsl(153 50% 28%)', 'hsl(25 90% 55%)', 'hsl(210 80% 55%)', 'hsl(
 
 const SalesPage: React.FC = () => {
   const { orders, products, selectedDate } = useData();
-  const [activeTab, setActiveTab] = useState<'today' | 'most' | 'least'>('today');
+  const [activeTab, setActiveTab] = useState<'today' | 'most' | 'least' | 'discount'>('today');
+  const discountedOrders = orders.filter(o => (o.discount || 0) > 0);
+  const totalDiscount = discountedOrders.reduce((s, o) => s + o.discount, 0);
 
   const todayOrders = orders.filter(o => o.date === selectedDate);
   const todaySales = todayOrders.reduce((s, o) => s + o.total, 0);
