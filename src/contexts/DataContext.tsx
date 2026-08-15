@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth, AppRole } from '@/contexts/AuthContext';
 
 export interface Product {
   id: string;
@@ -44,7 +44,7 @@ export interface Expense {
   price: number;
   date: string;
   takenBy: string;
-  role: 'admin' | 'staff';
+  role: AppRole;
   fund: FundKey;
 }
 
@@ -64,7 +64,12 @@ export interface FinanceTxn {
   reason: string;
   date: string;
   by: string;
-  role: 'admin' | 'staff';
+  role: AppRole;
+}
+
+export interface TelegramConfig {
+  botToken: string;
+  chatId: string;
 }
 
 export interface Note {
@@ -171,7 +176,7 @@ interface DataContextType {
   updateMaterial: (id: string, m: Partial<StoreMaterial>) => void;
   deleteMaterial: (id: string) => void;
   useMaterial: (id: string, amount: number) => void;
-  addExpense: (e: Omit<Expense, 'id' | 'takenBy' | 'role'> & { takenBy?: string; role?: 'admin' | 'staff' }) => void;
+  addExpense: (e: Omit<Expense, 'id' | 'takenBy' | 'role'> & { takenBy?: string; role?: AppRole }) => void;
   updateExpense: (id: string, e: Partial<Expense>) => void;
   deleteExpense: (id: string) => void;
   updateFinanceConfig: (c: Partial<FinanceConfig>) => void;
@@ -188,6 +193,9 @@ interface DataContextType {
   deleteTodo: (id: string) => void;
   currentUserName: string;
   isAdmin: boolean;
+  currentRole: AppRole;
+  telegramConfig: TelegramConfig;
+  updateTelegramConfig: (c: Partial<TelegramConfig>) => void;
   selectedDate: string;
   setSelectedDate: (d: string) => void;
   drinkSubCategories: string[];
@@ -224,8 +232,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [selectedDate, setSelectedDate] = useState(today);
 
   const currentUserName = user ? `${user.firstName}` : 'Admin';
-  const isAdmin = (user?.username || '').toLowerCase() !== 'abilo';
-  const role: 'admin' | 'staff' = isAdmin ? 'admin' : 'staff';
+  const role: AppRole = user?.role || 'admin';
+  const isAdmin = role === 'admin';
+  const [telegramConfig, setTelegramConfig] = useState<TelegramConfig>(() => loadOrDefault('cafe_telegram_config', { botToken: '', chatId: '' }));
+  const updateTelegramConfig = (c: Partial<TelegramConfig>) => setTelegramConfig(prev => ({ ...prev, ...c }));
 
   useEffect(() => { localStorage.setItem('cafe_products_v2', JSON.stringify(products)); }, [products]);
   useEffect(() => { localStorage.setItem('cafe_orders_v2', JSON.stringify(orders)); }, [orders]);
@@ -234,6 +244,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => { localStorage.setItem('cafe_finance_config', JSON.stringify(financeConfig)); }, [financeConfig]);
   useEffect(() => { localStorage.setItem('cafe_finance_txns', JSON.stringify(txns)); }, [txns]);
   useEffect(() => { localStorage.setItem('cafe_notes', JSON.stringify(notes)); }, [notes]);
+  useEffect(() => { localStorage.setItem('cafe_telegram_config', JSON.stringify(telegramConfig)); }, [telegramConfig]);
   useEffect(() => { localStorage.setItem('cafe_todos', JSON.stringify(todos)); }, [todos]);
 
   const addProduct = (p: Omit<Product, 'id'>) => setProducts(prev => [...prev, { ...p, id: crypto.randomUUID() }]);
@@ -309,7 +320,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       addExpense, updateExpense, deleteExpense,
       updateFinanceConfig, deposit, withdraw, fundBalance, rentStatus, suggestAllocation,
       sendNote, markNoteRead, deleteNote, addTodo, toggleTodo, deleteTodo,
-      currentUserName, isAdmin,
+      currentUserName, isAdmin, currentRole: role, telegramConfig, updateTelegramConfig,
       selectedDate, setSelectedDate,
       drinkSubCategories: drinkSubs, foodSubCategories: foodSubs, snackSubCategories: snackSubs,
     }}>
