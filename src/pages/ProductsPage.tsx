@@ -10,7 +10,7 @@ const ProductsPage: React.FC = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<Product | null>(null);
-  const [form, setForm] = useState({ name: '', description: '', price: '', category: 'drink' as Product['category'], subCategory: '', image: '' });
+  const [form, setForm] = useState({ name: '', description: '', price: '', profit: '', category: 'drink' as Product['category'], subCategory: '', image: '' });
 
   const categories = ['drink', 'food', 'snacks'] as const;
   const getSubCategories = (cat: string) => cat === 'drink' ? drinkSubCategories : cat === 'food' ? foodSubCategories : snackSubCategories;
