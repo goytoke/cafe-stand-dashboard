@@ -63,7 +63,48 @@ const SalesPage: React.FC = () => {
         ))}
       </div>
 
-      {activeTab === 'today' ? (
+      {activeTab === 'discount' ? (
+        <>
+          <div className="stat-card">
+            <p className="text-xs text-muted-foreground">Total discount given</p>
+            <p className="text-2xl font-heading font-bold mt-1">{totalDiscount.toLocaleString()} ETB</p>
+          </div>
+          <div className="table-container overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead><tr className="border-b border-border bg-secondary/50">
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Date</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Order</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Subtotal</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Discount</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Reason</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Total</th>
+              </tr></thead>
+              <tbody>
+                {discountedOrders.map(o => (
+                  <tr key={o.id} className="border-b border-border hover:bg-secondary/30">
+                    <td className="px-4 py-3 text-muted-foreground">{o.date}</td>
+                    <td className="px-4 py-3 font-medium">#{o.id.substring(0, 8)}</td>
+                    <td className="px-4 py-3">{o.subtotal.toLocaleString()} ETB</td>
+                    <td className="px-4 py-3 text-destructive">-{o.discount.toLocaleString()} ETB</td>
+                    <td className="px-4 py-3">{o.discountReason}</td>
+                    <td className="px-4 py-3 font-bold">{o.total.toLocaleString()} ETB</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {discountedOrders.length === 0 && <div className="p-8 text-center text-muted-foreground text-sm">No discounted orders</div>}
+          </div>
+          <div className="panel-card p-6">
+            <h3 className="text-sm font-heading font-semibold mb-4">Discounts</h3>
+            <ResponsiveContainer width="100%" height={250}>
+              <BarChart data={discountedOrders.map(o => ({ name: o.discountReason.substring(0, 12) || o.date, amount: o.discount }))}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(30 15% 88%)" /><XAxis dataKey="name" tick={{ fontSize: 11 }} /><YAxis tick={{ fontSize: 11 }} /><Tooltip />
+                <Bar dataKey="amount" fill="hsl(25 90% 55%)" radius={[6, 6, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </>
+      ) : activeTab === 'today' ? (
         <>
           {todaySales === 0 ? (
             <div className="panel-card p-6 text-center text-muted-foreground">No sales for {selectedDate}</div>
