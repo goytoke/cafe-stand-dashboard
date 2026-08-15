@@ -16,6 +16,8 @@ import ExpiredItemsPage from "@/pages/ExpiredItemsPage";
 import ExpensesPage from "@/pages/ExpensesPage";
 import SalesPage from "@/pages/SalesPage";
 import ReportPage from "@/pages/ReportPage";
+import FinancePage from "@/pages/FinancePage";
+import NotesPage from "@/pages/NotesPage";
 import EditProfilePage from "@/pages/EditProfilePage";
 import NotFound from "@/pages/NotFound";
 
