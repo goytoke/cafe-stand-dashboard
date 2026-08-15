@@ -23,7 +23,7 @@ const ProductsPage: React.FC = () => {
   });
 
   const openAddForm = () => {
-    setForm({ name: '', description: '', price: '', category: activeCategory, subCategory: subCategories[0] || '', image: '' });
+    setForm({ name: '', description: '', price: '', profit: '', category: activeCategory, subCategory: subCategories[0] || '', image: '' });
     setEditingProduct(null);
     setShowForm(true);
   };
