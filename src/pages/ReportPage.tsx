@@ -45,7 +45,9 @@ const ReportPage: React.FC = () => {
   const tabs = [
     { key: 'overview' as const, label: 'Overview' },
     { key: 'products' as const, label: 'Products' },
-    { key: 'expenses' as const, label: 'Expenses' },
+    { key: 'expenses' as const, label: 'Cost' },
+    { key: 'discount' as const, label: 'Discount' },
+    { key: 'finance' as const, label: 'Finance' },
     { key: 'inventory' as const, label: 'Inventory' },
   ];
 
