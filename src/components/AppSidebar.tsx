@@ -17,8 +17,10 @@ const navItems = [
       { label: 'Expired Items', icon: AlertTriangle, path: '/store/expired' },
     ]
   },
-  { label: 'Expense', icon: DollarSign, path: '/expenses' },
+  { label: 'Cost', icon: DollarSign, path: '/expenses' },
+  { label: 'Balance & Finance', icon: Wallet, path: '/finance' },
   { label: 'Sales', icon: TrendingUp, path: '/sales' },
+  { label: 'Notes', icon: StickyNote, path: '/notes' },
   { label: 'Report', icon: FileText, path: '/report' },
 ];
 
