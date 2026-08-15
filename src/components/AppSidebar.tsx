@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   LayoutDashboard, Package, ShoppingCart, Warehouse, DollarSign, TrendingUp, FileText,
-  ChevronDown, ChevronRight, AlertTriangle, Clock, LogOut
+  ChevronDown, ChevronRight, AlertTriangle, Clock, LogOut, Wallet, StickyNote
 } from 'lucide-react';
 
 const navItems = [
