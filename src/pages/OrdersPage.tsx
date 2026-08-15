@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useData, Product } from '@/contexts/DataContext';
-import { ShoppingCart, X, CreditCard } from 'lucide-react';
+import { ShoppingCart, Trash2, CreditCard, Plus, Minus } from 'lucide-react';
 import { toast } from 'sonner';
 
 const OrdersPage: React.FC = () => {
@@ -9,6 +9,9 @@ const OrdersPage: React.FC = () => {
   const [activeSubCategory, setActiveSubCategory] = useState('');
   const [cart, setCart] = useState<{ product: Product; quantity: number }[]>([]);
   const [paymentMethod, setPaymentMethod] = useState<'cash' | 'ebirr' | 'cbe' | 'telebirr'>('cash');
+  const [hasDiscount, setHasDiscount] = useState(false);
+  const [discountAmount, setDiscountAmount] = useState('');
+  const [discountReason, setDiscountReason] = useState('');
   const categories = ['drink', 'food', 'snacks'] as const;
   const subCategories = activeCategory === 'drink' ? drinkSubCategories : activeCategory === 'food' ? foodSubCategories : snackSubCategories;
 
@@ -26,14 +29,26 @@ const OrdersPage: React.FC = () => {
     });
   };
 
+  const changeQty = (id: string, delta: number) =>
+    setCart(prev => prev
+      .map(i => i.product.id === id ? { ...i, quantity: i.quantity + delta } : i)
+      .filter(i => i.quantity > 0));
+
   const removeFromCart = (id: string) => setCart(prev => prev.filter(i => i.product.id !== id));
-  const total = cart.reduce((sum, i) => sum + i.product.price * i.quantity, 0);
+
+  const subtotal = cart.reduce((sum, i) => sum + i.product.price * i.quantity, 0);
+  const discount = hasDiscount ? Math.min(Number(discountAmount) || 0, subtotal) : 0;
+  const total = subtotal - discount;
 
   const placeOrder = () => {
     if (cart.length === 0) { toast.error('Add items to order'); return; }
-    addOrder({ items: cart, total, paymentMethod, date: selectedDate });
+    if (hasDiscount && (!discount || !discountReason.trim())) { toast.error('Enter discount amount and reason'); return; }
+    addOrder({ items: cart, subtotal, discount, discountReason: discount ? discountReason : '', total, paymentMethod, date: selectedDate });
     toast.success('Order placed successfully!');
     setCart([]);
+    setHasDiscount(false);
+    setDiscountAmount('');
+    setDiscountReason('');
   };
 
   return (
@@ -82,21 +97,47 @@ const OrdersPage: React.FC = () => {
           ) : (
             <div className="space-y-2 max-h-60 overflow-y-auto">
               {cart.map(i => (
-                <div key={i.product.id} className="flex items-center justify-between p-2 bg-secondary rounded-lg">
-                  <div>
-                    <p className="text-sm font-medium">{i.product.name}</p>
+                <div key={i.product.id} className="flex items-center justify-between gap-2 p-2 bg-secondary rounded-lg">
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium truncate">{i.product.name}</p>
                     <p className="text-xs text-muted-foreground">{i.quantity} × {i.product.price} ETB</p>
                   </div>
-                  <button onClick={() => removeFromCart(i.product.id)}><X size={14} className="text-muted-foreground hover:text-destructive" /></button>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <button onClick={() => changeQty(i.product.id, -1)} aria-label="Decrease quantity"
+                      className="p-1 rounded bg-card border border-border hover:bg-muted"><Minus size={12} /></button>
+                    <span className="w-5 text-center text-xs font-semibold">{i.quantity}</span>
+                    <button onClick={() => changeQty(i.product.id, 1)} aria-label="Increase quantity"
+                      className="p-1 rounded bg-card border border-border hover:bg-muted"><Plus size={12} /></button>
+                    <button onClick={() => removeFromCart(i.product.id)} aria-label="Remove item"
+                      className="p-1 rounded hover:bg-destructive/10 text-destructive"><Trash2 size={12} /></button>
+                  </div>
                 </div>
               ))}
             </div>
           )}
-          <div className="border-t border-border pt-3">
-            <div className="flex justify-between text-sm font-bold">
-              <span>Total</span><span>{total.toLocaleString()} ETB</span>
-            </div>
+
+          {/* Discount */}
+          <div className="border-t border-border pt-3 space-y-2">
+            <label className="flex items-center gap-2 text-xs font-medium cursor-pointer">
+              <input type="checkbox" checked={hasDiscount} onChange={e => setHasDiscount(e.target.checked)} className="accent-primary w-4 h-4" />
+              Apply discount
+            </label>
+            {hasDiscount && (
+              <div className="space-y-2 animate-fade-in">
+                <input type="number" placeholder="Discount amount (ETB)" value={discountAmount} onChange={e => setDiscountAmount(e.target.value)}
+                  className="w-full px-3 py-2 bg-secondary rounded-lg text-xs border border-border outline-none focus:ring-2 focus:ring-primary/30" />
+                <input placeholder="Discount reason" value={discountReason} onChange={e => setDiscountReason(e.target.value)}
+                  className="w-full px-3 py-2 bg-secondary rounded-lg text-xs border border-border outline-none focus:ring-2 focus:ring-primary/30" />
+              </div>
+            )}
           </div>
+
+          <div className="border-t border-border pt-3 space-y-1">
+            <div className="flex justify-between text-xs text-muted-foreground"><span>Subtotal</span><span>{subtotal.toLocaleString()} ETB</span></div>
+            {discount > 0 && <div className="flex justify-between text-xs text-accent"><span>Discount</span><span>-{discount.toLocaleString()} ETB</span></div>}
+            <div className="flex justify-between text-sm font-bold"><span>Total</span><span>{total.toLocaleString()} ETB</span></div>
+          </div>
+
           <div>
             <label className="text-xs font-medium text-muted-foreground">Payment Method</label>
             <div className="grid grid-cols-2 gap-2 mt-2">

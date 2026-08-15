@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   LayoutDashboard, Package, ShoppingCart, Warehouse, DollarSign, TrendingUp, FileText,
-  ChevronDown, ChevronRight, AlertTriangle, Clock, LogOut
+  ChevronDown, ChevronRight, AlertTriangle, Clock, LogOut, Wallet, StickyNote
 } from 'lucide-react';
 
 const navItems = [
@@ -17,8 +17,10 @@ const navItems = [
       { label: 'Expired Items', icon: AlertTriangle, path: '/store/expired' },
     ]
   },
-  { label: 'Expense', icon: DollarSign, path: '/expenses' },
+  { label: 'Cost', icon: DollarSign, path: '/expenses' },
+  { label: 'Balance & Finance', icon: Wallet, path: '/finance' },
   { label: 'Sales', icon: TrendingUp, path: '/sales' },
+  { label: 'Notes', icon: StickyNote, path: '/notes' },
   { label: 'Report', icon: FileText, path: '/report' },
 ];
 

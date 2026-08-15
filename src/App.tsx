@@ -16,6 +16,8 @@ import ExpiredItemsPage from "@/pages/ExpiredItemsPage";
 import ExpensesPage from "@/pages/ExpensesPage";
 import SalesPage from "@/pages/SalesPage";
 import ReportPage from "@/pages/ReportPage";
+import FinancePage from "@/pages/FinancePage";
+import NotesPage from "@/pages/NotesPage";
 import EditProfilePage from "@/pages/EditProfilePage";
 import NotFound from "@/pages/NotFound";
 
@@ -41,6 +43,8 @@ const App = () => (
                 <Route path="/store/expired" element={<ExpiredItemsPage />} />
                 <Route path="/expenses" element={<ExpensesPage />} />
                 <Route path="/sales" element={<SalesPage />} />
+                <Route path="/finance" element={<FinancePage />} />
+                <Route path="/notes" element={<NotesPage />} />
                 <Route path="/report" element={<ReportPage />} />
                 <Route path="/edit-profile" element={<EditProfilePage />} />
               </Route>

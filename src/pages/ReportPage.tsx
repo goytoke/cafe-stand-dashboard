@@ -6,8 +6,13 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 const COLORS = ['hsl(153 50% 28%)', 'hsl(25 90% 55%)', 'hsl(210 80% 55%)', 'hsl(38 92% 50%)', 'hsl(0 72% 51%)'];
 
 const ReportPage: React.FC = () => {
-  const { orders, expenses, materials, products, selectedDate } = useData();
-  const [reportType, setReportType] = useState<'overview' | 'products' | 'expenses' | 'inventory'>('overview');
+  const { orders, expenses, materials, products, selectedDate, fundBalance } = useData();
+  const [reportType, setReportType] = useState<'overview' | 'products' | 'expenses' | 'discount' | 'finance' | 'inventory'>('overview');
+
+  const totalDiscount = orders.reduce((s, o) => s + (o.discount || 0), 0);
+  const costByAdmin = expenses.filter(e => e.role === 'admin').reduce((s, e) => s + e.price, 0);
+  const costByStaff = expenses.filter(e => e.role === 'staff').reduce((s, e) => s + e.price, 0);
+  const discountedOrders = orders.filter(o => (o.discount || 0) > 0);
 
   const totalRevenue = orders.reduce((s, o) => s + o.total, 0);
   const totalExpenses = expenses.reduce((s, e) => s + e.price, 0);
@@ -28,6 +33,9 @@ const ReportPage: React.FC = () => {
       `Total Expenses: ${totalExpenses} ETB`,
       `Profit: ${profit} ETB`,
       `Total Orders: ${totalOrders}`,
+      `Total Discount: ${totalDiscount} ETB`,
+      `Cost by Admin: ${costByAdmin} ETB`,
+      `Cost by Staff: ${costByStaff} ETB`,
       '',
       'Revenue by Category:',
       ...categoryRevenue.map(c => `  ${c.name}: ${c.value} ETB`),
@@ -40,7 +48,9 @@ const ReportPage: React.FC = () => {
   const tabs = [
     { key: 'overview' as const, label: 'Overview' },
     { key: 'products' as const, label: 'Products' },
-    { key: 'expenses' as const, label: 'Expenses' },
+    { key: 'expenses' as const, label: 'Cost' },
+    { key: 'discount' as const, label: 'Discount' },
+    { key: 'finance' as const, label: 'Finance' },
     { key: 'inventory' as const, label: 'Inventory' },
   ];
 
@@ -110,21 +120,79 @@ const ReportPage: React.FC = () => {
       )}
 
       {reportType === 'expenses' && (
-        <div className="table-container overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead><tr className="border-b border-border bg-secondary/50">
-              <th className="text-left px-4 py-3 font-medium text-muted-foreground">Date</th>
-              <th className="text-left px-4 py-3 font-medium text-muted-foreground">Reason</th>
-              <th className="text-left px-4 py-3 font-medium text-muted-foreground">Amount</th>
-            </tr></thead>
-            <tbody>{expenses.map(e => (
-              <tr key={e.id} className="border-b border-border hover:bg-secondary/30">
-                <td className="px-4 py-3 text-muted-foreground">{e.date}</td>
-                <td className="px-4 py-3 font-medium">{e.reason}</td>
-                <td className="px-4 py-3">{e.price.toLocaleString()} ETB</td>
-              </tr>
-            ))}</tbody>
-          </table>
+        <div className="space-y-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <div className="stat-card"><p className="text-xs text-muted-foreground">Total Cost</p><p className="text-xl font-heading font-bold">{totalExpenses.toLocaleString()} ETB</p></div>
+            <div className="stat-card"><p className="text-xs text-muted-foreground">Cost by Admin</p><p className="text-xl font-heading font-bold text-primary">{costByAdmin.toLocaleString()} ETB</p></div>
+            <div className="stat-card"><p className="text-xs text-muted-foreground">Cost by Staff</p><p className="text-xl font-heading font-bold text-accent">{costByStaff.toLocaleString()} ETB</p></div>
+          </div>
+          <div className="table-container overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead><tr className="border-b border-border bg-secondary/50">
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Date</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Reason</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Amount</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Fund</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Taken By</th>
+              </tr></thead>
+              <tbody>{expenses.map(e => (
+                <tr key={e.id} className="border-b border-border hover:bg-secondary/30">
+                  <td className="px-4 py-3 text-muted-foreground">{e.date}</td>
+                  <td className="px-4 py-3 font-medium">{e.reason}</td>
+                  <td className="px-4 py-3">{e.price.toLocaleString()} ETB</td>
+                  <td className="px-4 py-3 capitalize">{e.fund}</td>
+                  <td className="px-4 py-3">{e.takenBy} · {e.role === 'admin' ? 'Admin' : 'Staff'}</td>
+                </tr>
+              ))}</tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {reportType === 'discount' && (
+        <div className="space-y-6">
+          <div className="stat-card"><p className="text-xs text-muted-foreground">Total Discount</p><p className="text-xl font-heading font-bold text-accent">{totalDiscount.toLocaleString()} ETB</p></div>
+          <div className="table-container overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead><tr className="border-b border-border bg-secondary/50">
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Date</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Order</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Discount</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Reason</th>
+              </tr></thead>
+              <tbody>{discountedOrders.map(o => (
+                <tr key={o.id} className="border-b border-border hover:bg-secondary/30">
+                  <td className="px-4 py-3 text-muted-foreground">{o.date}</td>
+                  <td className="px-4 py-3 font-medium">#{o.id.substring(0, 8)}</td>
+                  <td className="px-4 py-3 text-destructive">-{o.discount.toLocaleString()} ETB</td>
+                  <td className="px-4 py-3">{o.discountReason}</td>
+                </tr>
+              ))}</tbody>
+            </table>
+            {discountedOrders.length === 0 && <div className="p-8 text-center text-muted-foreground text-sm">No discounts</div>}
+          </div>
+        </div>
+      )}
+
+      {reportType === 'finance' && (
+        <div className="space-y-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {(['rent', 'saving', 'ingredient', 'other'] as const).map(f => (
+              <div key={f} className="stat-card">
+                <p className="text-xs text-muted-foreground capitalize">{f} Fund</p>
+                <p className="text-xl font-heading font-bold">{fundBalance(f).toLocaleString()} ETB</p>
+              </div>
+            ))}
+          </div>
+          <div className="panel-card p-6">
+            <h3 className="text-sm font-heading font-semibold mb-4">Fund Balances</h3>
+            <ResponsiveContainer width="100%" height={250}>
+              <BarChart data={(['rent', 'saving', 'ingredient', 'other'] as const).map(f => ({ name: f, balance: fundBalance(f) }))}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(30 15% 88%)" /><XAxis dataKey="name" tick={{ fontSize: 11 }} /><YAxis tick={{ fontSize: 11 }} /><Tooltip />
+                <Bar dataKey="balance" fill="hsl(210 80% 55%)" radius={[6, 6, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </div>
       )}
 

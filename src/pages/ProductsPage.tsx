@@ -10,7 +10,7 @@ const ProductsPage: React.FC = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<Product | null>(null);
-  const [form, setForm] = useState({ name: '', description: '', price: '', category: 'drink' as Product['category'], subCategory: '', image: '' });
+  const [form, setForm] = useState({ name: '', description: '', price: '', profit: '', category: 'drink' as Product['category'], subCategory: '', image: '' });
 
   const categories = ['drink', 'food', 'snacks'] as const;
   const getSubCategories = (cat: string) => cat === 'drink' ? drinkSubCategories : cat === 'food' ? foodSubCategories : snackSubCategories;
@@ -23,20 +23,20 @@ const ProductsPage: React.FC = () => {
   });
 
   const openAddForm = () => {
-    setForm({ name: '', description: '', price: '', category: activeCategory, subCategory: subCategories[0] || '', image: '' });
+    setForm({ name: '', description: '', price: '', profit: '', category: activeCategory, subCategory: subCategories[0] || '', image: '' });
     setEditingProduct(null);
     setShowForm(true);
   };
 
   const openEditForm = (p: Product) => {
-    setForm({ name: p.name, description: p.description, price: String(p.price), category: p.category, subCategory: p.subCategory, image: p.image || '' });
+    setForm({ name: p.name, description: p.description, price: String(p.price), profit: String(p.profit ?? 0), category: p.category, subCategory: p.subCategory, image: p.image || '' });
     setEditingProduct(p);
     setShowForm(true);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const data = { name: form.name, description: form.description, price: Number(form.price), category: form.category, subCategory: form.subCategory, image: form.image, status: 'active' as const };
+    const data = { name: form.name, description: form.description, price: Number(form.price), profit: Number(form.profit) || 0, category: form.category, subCategory: form.subCategory, image: form.image, status: 'active' as const };
     if (editingProduct) {
       updateProduct(editingProduct.id, data);
       toast.success(`${form.name} updated successfully`);
@@ -78,6 +78,13 @@ const ProductsPage: React.FC = () => {
             <div>
               <label className="text-sm font-medium">Price (ETB)</label>
               <input type="number" required value={form.price} onChange={e => setForm({ ...form, price: e.target.value })}
+                className="mt-1 w-full px-3 py-2.5 bg-secondary rounded-lg text-sm border border-border outline-none focus:ring-2 focus:ring-primary/30" />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-medium">Profit per unit (ETB)</label>
+              <input type="number" value={form.profit} onChange={e => setForm({ ...form, profit: e.target.value })}
                 className="mt-1 w-full px-3 py-2.5 bg-secondary rounded-lg text-sm border border-border outline-none focus:ring-2 focus:ring-primary/30" />
             </div>
           </div>
