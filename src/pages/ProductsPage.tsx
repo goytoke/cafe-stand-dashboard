@@ -36,7 +36,7 @@ const ProductsPage: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const data = { name: form.name, description: form.description, price: Number(form.price), category: form.category, subCategory: form.subCategory, image: form.image, status: 'active' as const };
+    const data = { name: form.name, description: form.description, price: Number(form.price), profit: Number(form.profit) || 0, category: form.category, subCategory: form.subCategory, image: form.image, status: 'active' as const };
     if (editingProduct) {
       updateProduct(editingProduct.id, data);
       toast.success(`${form.name} updated successfully`);
