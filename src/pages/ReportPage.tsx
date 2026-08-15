@@ -6,8 +6,13 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 const COLORS = ['hsl(153 50% 28%)', 'hsl(25 90% 55%)', 'hsl(210 80% 55%)', 'hsl(38 92% 50%)', 'hsl(0 72% 51%)'];
 
 const ReportPage: React.FC = () => {
-  const { orders, expenses, materials, products, selectedDate } = useData();
-  const [reportType, setReportType] = useState<'overview' | 'products' | 'expenses' | 'inventory'>('overview');
+  const { orders, expenses, materials, products, selectedDate, fundBalance } = useData();
+  const [reportType, setReportType] = useState<'overview' | 'products' | 'expenses' | 'discount' | 'finance' | 'inventory'>('overview');
+
+  const totalDiscount = orders.reduce((s, o) => s + (o.discount || 0), 0);
+  const costByAdmin = expenses.filter(e => e.role === 'admin').reduce((s, e) => s + e.price, 0);
+  const costByStaff = expenses.filter(e => e.role === 'staff').reduce((s, e) => s + e.price, 0);
+  const discountedOrders = orders.filter(o => (o.discount || 0) > 0);
 
   const totalRevenue = orders.reduce((s, o) => s + o.total, 0);
   const totalExpenses = expenses.reduce((s, e) => s + e.price, 0);
