@@ -81,6 +81,13 @@ const ProductsPage: React.FC = () => {
                 className="mt-1 w-full px-3 py-2.5 bg-secondary rounded-lg text-sm border border-border outline-none focus:ring-2 focus:ring-primary/30" />
             </div>
           </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-medium">Profit per unit (ETB)</label>
+              <input type="number" value={form.profit} onChange={e => setForm({ ...form, profit: e.target.value })}
+                className="mt-1 w-full px-3 py-2.5 bg-secondary rounded-lg text-sm border border-border outline-none focus:ring-2 focus:ring-primary/30" />
+            </div>
+          </div>
           <div>
             <label className="text-sm font-medium">Description</label>
             <textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })}
