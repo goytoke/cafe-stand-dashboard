@@ -248,11 +248,11 @@ function loadOrDefault<T>(key: string, def: T): T {
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuth();
   const [products, setProducts] = useState<Product[]>(() => loadOrDefault('cafe_products_v2', defaultProducts));
-  const [orders, setOrders] = useState<Order[]>(() => loadOrDefault('cafe_orders_v2', defaultOrders));
-  const [materials, setMaterials] = useState<StoreMaterial[]>(() => loadOrDefault('cafe_materials', defaultMaterials));
-  const [expenses, setExpenses] = useState<Expense[]>(() => loadOrDefault('cafe_expenses_v2', defaultExpenses));
+  const [orders, setOrders] = useState<Order[]>(() => loadOrDefault('cafe_orders_v3', defaultOrders));
+  const [materials, setMaterials] = useState<StoreMaterial[]>(() => loadOrDefault('cafe_materials_v3', defaultMaterials));
+  const [expenses, setExpenses] = useState<Expense[]>(() => loadOrDefault('cafe_expenses_v3', defaultExpenses));
   const [financeConfig, setFinanceConfig] = useState<FinanceConfig>(() => loadOrDefault('cafe_finance_config', defaultConfig));
-  const [txns, setTxns] = useState<FinanceTxn[]>(() => loadOrDefault('cafe_finance_txns', defaultTxns));
+  const [txns, setTxns] = useState<FinanceTxn[]>(() => loadOrDefault('cafe_finance_txns_v3', defaultTxns));
   const [notes, setNotes] = useState<Note[]>(() => loadOrDefault('cafe_notes', defaultNotes));
   const [todos, setTodos] = useState<TodoItem[]>(() => loadOrDefault('cafe_todos', defaultTodos));
   const [selectedDate, setSelectedDate] = useState(today);
@@ -264,11 +264,11 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const updateTelegramConfig = (c: Partial<TelegramConfig>) => setTelegramConfig(prev => ({ ...prev, ...c }));
 
   useEffect(() => { localStorage.setItem('cafe_products_v2', JSON.stringify(products)); }, [products]);
-  useEffect(() => { localStorage.setItem('cafe_orders_v2', JSON.stringify(orders)); }, [orders]);
-  useEffect(() => { localStorage.setItem('cafe_materials', JSON.stringify(materials)); }, [materials]);
-  useEffect(() => { localStorage.setItem('cafe_expenses_v2', JSON.stringify(expenses)); }, [expenses]);
+  useEffect(() => { localStorage.setItem('cafe_orders_v3', JSON.stringify(orders)); }, [orders]);
+  useEffect(() => { localStorage.setItem('cafe_materials_v3', JSON.stringify(materials)); }, [materials]);
+  useEffect(() => { localStorage.setItem('cafe_expenses_v3', JSON.stringify(expenses)); }, [expenses]);
   useEffect(() => { localStorage.setItem('cafe_finance_config', JSON.stringify(financeConfig)); }, [financeConfig]);
-  useEffect(() => { localStorage.setItem('cafe_finance_txns', JSON.stringify(txns)); }, [txns]);
+  useEffect(() => { localStorage.setItem('cafe_finance_txns_v3', JSON.stringify(txns)); }, [txns]);
   useEffect(() => { localStorage.setItem('cafe_notes', JSON.stringify(notes)); }, [notes]);
   useEffect(() => { localStorage.setItem('cafe_telegram_config', JSON.stringify(telegramConfig)); }, [telegramConfig]);
   useEffect(() => { localStorage.setItem('cafe_todos', JSON.stringify(todos)); }, [todos]);
