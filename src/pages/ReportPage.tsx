@@ -63,12 +63,50 @@ const ReportPage: React.FC = () => {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-3">
         <h2 className="text-xl font-heading font-bold">Report</h2>
-        <button onClick={exportReport} className="flex items-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:opacity-90">
-          <Download size={16} /> Export Report
-        </button>
+        <div className="flex items-center gap-2">
+          <button onClick={() => setShowTgConfig(v => !v)} title="Telegram bot config" className="flex items-center gap-2 px-3 py-2.5 bg-secondary rounded-lg text-sm font-medium hover:bg-secondary/70">
+            <Settings size={16} /> Telegram Config
+          </button>
+          <button onClick={sendTelegram} disabled={sending} title="Send report to Telegram bot" className="flex items-center gap-2 px-4 py-2.5 bg-info text-primary-foreground rounded-lg text-sm font-medium hover:opacity-90 disabled:opacity-60">
+            <Send size={16} /> {sending ? 'Sending...' : 'Send to Telegram'}
+          </button>
+          <button onClick={exportReport} className="flex items-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:opacity-90">
+            <Download size={16} /> Export Word
+          </button>
+        </div>
       </div>
+
+      {showTgConfig && (
+        <div className="panel-card p-6 space-y-4">
+          <h3 className="text-sm font-heading font-semibold">Telegram Bot Configuration</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="text-xs text-muted-foreground">Bot API Token</label>
+              <input
+                value={telegramConfig.botToken}
+                onChange={e => updateTelegramConfig({ botToken: e.target.value })}
+                placeholder="123456:ABC-DEF..."
+                className="w-full mt-1 px-3 py-2.5 bg-secondary rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary/30"
+              />
+            </div>
+            <div>
+              <label className="text-xs text-muted-foreground">Chat ID</label>
+              <input
+                value={telegramConfig.chatId}
+                onChange={e => updateTelegramConfig({ chatId: e.target.value })}
+                placeholder="e.g. 123456789"
+                className="w-full mt-1 px-3 py-2.5 bg-secondary rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary/30"
+              />
+            </div>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Create a bot with @BotFather to get the token, then send it a message and use your chat ID. The report is sent as a Word (.doc) document with a summary caption.
+          </p>
+        </div>
+      )}
+
 
       <div className="flex gap-2">
         {tabs.map(t => (
