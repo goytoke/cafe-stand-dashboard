@@ -113,25 +113,45 @@ const addDays = (n: number) => {
   return d.toISOString().split('T')[0];
 };
 
+const mk = (id: string, items: { p: number; q: number }[], pay: Order['paymentMethod'], date: string, discount = 0, discountReason = ''): Order => {
+  const orderItems = items.map(i => ({ product: defaultProducts[i.p], quantity: i.q }));
+  const subtotal = orderItems.reduce((s, i) => s + i.product.price * i.quantity, 0);
+  return { id, items: orderItems, subtotal, discount, discountReason, total: subtotal - discount, paymentMethod: pay, date };
+};
+
 const defaultOrders: Order[] = [
-  { id: '1', items: [{ product: defaultProducts[0], quantity: 2 }], subtotal: 240, discount: 0, discountReason: '', total: 240, paymentMethod: 'cash', date: today },
-  { id: '2', items: [{ product: defaultProducts[4], quantity: 1 }, { product: defaultProducts[6], quantity: 2 }], subtotal: 360, discount: 60, discountReason: 'Loyal customer', total: 300, paymentMethod: 'telebirr', date: today },
-  { id: '3', items: [{ product: defaultProducts[1], quantity: 3 }], subtotal: 450, discount: 0, discountReason: '', total: 450, paymentMethod: 'ebirr', date: today },
+  mk('1', [{ p: 0, q: 2 }], 'cash', today),
+  mk('2', [{ p: 4, q: 1 }, { p: 6, q: 2 }], 'telebirr', today, 60, 'Loyal customer'),
+  mk('3', [{ p: 1, q: 3 }], 'ebirr', today),
+  mk('4', [{ p: 7, q: 4 }, { p: 2, q: 2 }], 'cash', today),
+  mk('5', [{ p: 3, q: 2 }, { p: 6, q: 3 }], 'cbe', today, 40, 'Staff discount'),
+  mk('6', [{ p: 5, q: 2 }], 'telebirr', today),
+  mk('7', [{ p: 0, q: 3 }, { p: 4, q: 2 }], 'cash', addDays(-1)),
+  mk('8', [{ p: 1, q: 2 }, { p: 7, q: 5 }], 'ebirr', addDays(-1), 50, 'Promo day'),
+  mk('9', [{ p: 2, q: 4 }], 'cash', addDays(-2)),
+  mk('10', [{ p: 5, q: 1 }, { p: 6, q: 2 }], 'cbe', addDays(-2)),
 ];
 
 const defaultMaterials: StoreMaterial[] = [
-  { id: '1', name: 'Coffee Beans', quantity: 50, measurement: 'kg', pricePerUnit: 800, totalPrice: 40000, expiredDate: '2026-06-15', category: 'drink' },
-  { id: '2', name: 'Milk', quantity: 30, measurement: 'liter', pricePerUnit: 65, totalPrice: 1950, expiredDate: '2026-04-20', category: 'drink' },
-  { id: '3', name: 'Vanilla Syrup', quantity: 10, measurement: 'liter', pricePerUnit: 350, totalPrice: 3500, expiredDate: '2026-04-14', category: 'drink' },
-  { id: '4', name: 'Beef Patty', quantity: 20, measurement: 'kg', pricePerUnit: 450, totalPrice: 9000, expiredDate: '2026-04-12', category: 'food' },
-  { id: '5', name: 'Potato', quantity: 100, measurement: 'kg', pricePerUnit: 50, totalPrice: 5000, expiredDate: '2026-05-01', category: 'snacks' },
-  { id: '6', name: 'Mint Leaves', quantity: 5, measurement: 'kg', pricePerUnit: 200, totalPrice: 1000, expiredDate: '2026-04-11', category: 'drink' },
+  { id: '1', name: 'Coffee Beans', quantity: 50, measurement: 'kg', pricePerUnit: 800, totalPrice: 40000, expiredDate: addDays(120), category: 'drink' },
+  { id: '2', name: 'Milk', quantity: 30, measurement: 'liter', pricePerUnit: 65, totalPrice: 1950, expiredDate: addDays(4), category: 'drink' },
+  { id: '3', name: 'Vanilla Syrup', quantity: 10, measurement: 'liter', pricePerUnit: 350, totalPrice: 3500, expiredDate: addDays(2), category: 'drink' },
+  { id: '4', name: 'Beef Patty', quantity: 20, measurement: 'kg', pricePerUnit: 450, totalPrice: 9000, expiredDate: addDays(1), category: 'food' },
+  { id: '5', name: 'Potato', quantity: 100, measurement: 'kg', pricePerUnit: 50, totalPrice: 5000, expiredDate: addDays(45), category: 'snacks' },
+  { id: '6', name: 'Mint Leaves', quantity: 5, measurement: 'kg', pricePerUnit: 200, totalPrice: 1000, expiredDate: addDays(-2), category: 'drink' },
+  { id: '7', name: 'Whipping Cream', quantity: 6, measurement: 'liter', pricePerUnit: 420, totalPrice: 2520, expiredDate: addDays(-5), category: 'drink' },
+  { id: '8', name: 'Burger Buns', quantity: 40, measurement: 'pieces', pricePerUnit: 25, totalPrice: 1000, expiredDate: addDays(3), category: 'food' },
+  { id: '9', name: 'Cheese Slices', quantity: 200, measurement: 'gram', pricePerUnit: 3, totalPrice: 600, expiredDate: addDays(-1), category: 'food' },
 ];
 
 const defaultExpenses: Expense[] = [
   { id: '1', reason: 'Coffee Beans Purchase', quantity: 10, price: 8000, date: today, takenBy: 'Admin', role: 'admin', fund: 'ingredient' },
   { id: '2', reason: 'Milk Supply', quantity: 20, price: 1300, date: today, takenBy: 'Abilo', role: 'staff', fund: 'ingredient' },
   { id: '3', reason: 'Cleaning Supplies', quantity: 5, price: 500, date: today, takenBy: 'Abilo', role: 'staff', fund: 'other' },
+  { id: '4', reason: 'Equipment repair (from saving)', quantity: 1, price: 2500, date: today, takenBy: 'Admin', role: 'admin', fund: 'saving' },
+  { id: '5', reason: 'Cheese & buns restock', quantity: 12, price: 1600, date: addDays(-1), takenBy: 'Abilo', role: 'staff', fund: 'ingredient' },
+  { id: '6', reason: 'Staff transport (from saving)', quantity: 1, price: 700, date: addDays(-1), takenBy: 'Admin', role: 'admin', fund: 'saving' },
+  { id: '7', reason: 'Syrup restock', quantity: 4, price: 1400, date: addDays(-2), takenBy: 'Admin', role: 'admin', fund: 'ingredient' },
 ];
 
 const defaultConfig: FinanceConfig = {
@@ -143,13 +163,19 @@ const defaultConfig: FinanceConfig = {
 };
 
 const defaultTxns: FinanceTxn[] = [
-  { id: '1', type: 'deposit', fund: 'rent', amount: 10000, reason: 'Monthly rent saving', date: today, by: 'Admin', role: 'admin' },
-  { id: '2', type: 'deposit', fund: 'ingredient', amount: 12000, reason: 'Ingredient fund', date: today, by: 'Admin', role: 'admin' },
-  { id: '3', type: 'deposit', fund: 'saving', amount: 6000, reason: 'Saving fund', date: today, by: 'Admin', role: 'admin' },
-  { id: '4', type: 'withdraw', fund: 'ingredient', amount: 8000, reason: 'Coffee Beans Purchase', date: today, by: 'Admin', role: 'admin' },
-  { id: '5', type: 'withdraw', fund: 'ingredient', amount: 1300, reason: 'Milk Supply', date: today, by: 'Abilo', role: 'staff' },
-  { id: '6', type: 'withdraw', fund: 'other', amount: 500, reason: 'Cleaning Supplies', date: today, by: 'Abilo', role: 'staff' },
+  { id: '1', type: 'deposit', fund: 'rent', amount: 18000, reason: 'Monthly rent saving', date: addDays(-2), by: 'Admin', role: 'admin' },
+  { id: '2', type: 'deposit', fund: 'ingredient', amount: 20000, reason: 'Ingredient fund', date: addDays(-2), by: 'Admin', role: 'admin' },
+  { id: '3', type: 'deposit', fund: 'saving', amount: 15000, reason: 'Saving fund', date: addDays(-2), by: 'Admin', role: 'admin' },
+  { id: '4', type: 'deposit', fund: 'other', amount: 4000, reason: 'Misc fund', date: addDays(-2), by: 'Admin', role: 'admin' },
+  { id: '5', type: 'withdraw', fund: 'ingredient', amount: 1400, reason: 'Syrup restock', date: addDays(-2), by: 'Admin', role: 'admin' },
+  { id: '6', type: 'withdraw', fund: 'ingredient', amount: 1600, reason: 'Cheese & buns restock', date: addDays(-1), by: 'Abilo', role: 'staff' },
+  { id: '7', type: 'withdraw', fund: 'saving', amount: 700, reason: 'Staff transport (from saving)', date: addDays(-1), by: 'Admin', role: 'admin' },
+  { id: '8', type: 'withdraw', fund: 'ingredient', amount: 8000, reason: 'Coffee Beans Purchase', date: today, by: 'Admin', role: 'admin' },
+  { id: '9', type: 'withdraw', fund: 'ingredient', amount: 1300, reason: 'Milk Supply', date: today, by: 'Abilo', role: 'staff' },
+  { id: '10', type: 'withdraw', fund: 'other', amount: 500, reason: 'Cleaning Supplies', date: today, by: 'Abilo', role: 'staff' },
+  { id: '11', type: 'withdraw', fund: 'saving', amount: 2500, reason: 'Equipment repair (from saving)', date: today, by: 'Admin', role: 'admin' },
 ];
+
 
 const defaultNotes: Note[] = [
   { id: '1', from: 'Abilo', to: 'Admin', subject: 'Milk running low', body: 'We only have 2 liters of milk left, please order more before Friday.', date: today, read: false },
