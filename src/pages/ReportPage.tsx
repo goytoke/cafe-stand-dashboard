@@ -1,13 +1,17 @@
 import React, { useState } from 'react';
 import { useData } from '@/contexts/DataContext';
-import { Download } from 'lucide-react';
+import { Download, Send, Settings } from 'lucide-react';
+import { toast } from 'sonner';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { downloadWordReport, sendReportToTelegram, ReportSnapshot } from '@/lib/reportDoc';
 
 const COLORS = ['hsl(153 50% 28%)', 'hsl(25 90% 55%)', 'hsl(210 80% 55%)', 'hsl(38 92% 50%)', 'hsl(0 72% 51%)'];
 
 const ReportPage: React.FC = () => {
-  const { orders, expenses, materials, products, selectedDate, fundBalance } = useData();
+  const { orders, expenses, materials, products, selectedDate, fundBalance, txns, notes, todos, telegramConfig, updateTelegramConfig } = useData();
   const [reportType, setReportType] = useState<'overview' | 'products' | 'expenses' | 'discount' | 'finance' | 'inventory'>('overview');
+  const [showTgConfig, setShowTgConfig] = useState(false);
+  const [sending, setSending] = useState(false);
 
   const totalDiscount = orders.reduce((s, o) => s + (o.discount || 0), 0);
   const costByAdmin = expenses.filter(e => e.role === 'admin').reduce((s, e) => s + e.price, 0);
@@ -24,26 +28,29 @@ const ReportPage: React.FC = () => {
     value: orders.reduce((s, o) => s + o.items.filter(i => i.product.category === cat).reduce((is, i) => is + i.product.price * i.quantity, 0), 0),
   }));
 
+  const snapshot: ReportSnapshot = { date: selectedDate, orders, expenses, materials, txns, notes, todos, fundBalance };
+
   const exportReport = () => {
-    const lines = [
-      'The Anfield Stand - Report',
-      `Date: ${selectedDate}`,
-      '',
-      `Total Revenue: ${totalRevenue} ETB`,
-      `Total Expenses: ${totalExpenses} ETB`,
-      `Profit: ${profit} ETB`,
-      `Total Orders: ${totalOrders}`,
-      `Total Discount: ${totalDiscount} ETB`,
-      `Cost by Admin: ${costByAdmin} ETB`,
-      `Cost by Staff: ${costByStaff} ETB`,
-      '',
-      'Revenue by Category:',
-      ...categoryRevenue.map(c => `  ${c.name}: ${c.value} ETB`),
-    ];
-    const blob = new Blob([lines.join('\n')], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a'); a.href = url; a.download = 'report.txt'; a.click();
+    downloadWordReport(snapshot);
+    toast.success('Word report downloaded');
   };
+
+  const sendTelegram = async () => {
+    if (!telegramConfig.botToken || !telegramConfig.chatId) {
+      setShowTgConfig(true);
+      return toast.error('Add your Telegram bot token and chat ID first');
+    }
+    setSending(true);
+    try {
+      await sendReportToTelegram(telegramConfig, snapshot);
+      toast.success('Report sent to your Telegram bot');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to send report');
+    } finally {
+      setSending(false);
+    }
+  };
+
 
   const tabs = [
     { key: 'overview' as const, label: 'Overview' },
