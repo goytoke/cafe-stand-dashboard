@@ -207,6 +207,8 @@ interface DataContextType {
   txns: FinanceTxn[];
   notes: Note[];
   todos: TodoItem[];
+  takeouts: Takeout[];
+
   addProduct: (p: Omit<Product, 'id'>) => void;
   updateProduct: (id: string, p: Partial<Product>) => void;
   deleteProduct: (id: string) => void;
