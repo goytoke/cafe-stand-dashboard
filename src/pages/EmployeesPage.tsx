@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { useAuth, Employee, AppRole } from '@/contexts/AuthContext';
-import { Plus, Pencil, Trash2, X } from 'lucide-react';
+import { useAuth, Employee, AppRole, EmploymentType } from '@/contexts/AuthContext';
+import { Plus, Pencil, Trash2, X, Users, Share2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 const roles: { key: AppRole; label: string }[] = [
@@ -9,11 +9,16 @@ const roles: { key: AppRole; label: string }[] = [
   { key: 'shareholder', label: 'Shareholder' },
 ];
 
-const emptyForm = { firstName: '', lastName: '', username: '', password: '', phone: '', role: 'staff' as AppRole, profilePic: '' };
+const emptyForm = {
+  firstName: '', lastName: '', username: '', password: '', phone: '',
+  role: 'staff' as AppRole, profilePic: '',
+  employment: 'coworker' as EmploymentType, salary: '',
+};
 
 const EmployeesPage: React.FC = () => {
   const { employees, addEmployee, updateEmployee, deleteEmployee, user } = useAuth();
   const [showForm, setShowForm] = useState(false);
+  const [tab, setTab] = useState<'coworker' | 'shared'>('coworker');
   const [editing, setEditing] = useState<Employee | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<Employee | null>(null);
   const [form, setForm] = useState(emptyForm);
@@ -22,10 +27,14 @@ const EmployeesPage: React.FC = () => {
     return <div className="panel-card p-6 text-center text-muted-foreground">Only admins can manage employees.</div>;
   }
 
-  const openAdd = () => { setEditing(null); setForm(emptyForm); setShowForm(true); };
+  const openAdd = () => { setEditing(null); setForm({ ...emptyForm, employment: tab === 'shared' ? 'shared' : 'coworker' }); setShowForm(true); };
   const openEdit = (e: Employee) => {
     setEditing(e);
-    setForm({ firstName: e.firstName, lastName: e.lastName, username: e.username, password: e.password, phone: e.phone, role: e.role, profilePic: e.profilePic || '' });
+    setForm({
+      firstName: e.firstName, lastName: e.lastName, username: e.username, password: e.password,
+      phone: e.phone, role: e.role, profilePic: e.profilePic || '',
+      employment: e.employment || 'coworker', salary: e.salary ? String(e.salary) : '',
+    });
     setShowForm(true);
   };
 
@@ -38,22 +47,39 @@ const EmployeesPage: React.FC = () => {
 
   const submit = (ev: React.FormEvent) => {
     ev.preventDefault();
+    const payload = {
+      firstName: form.firstName, lastName: form.lastName, username: form.username,
+      password: form.password, phone: form.phone, role: form.role, profilePic: form.profilePic,
+      employment: form.employment,
+      salary: form.employment === 'shared' ? undefined : Number(form.salary) || undefined,
+    };
     if (editing) {
-      updateEmployee(editing.id, form);
+      updateEmployee(editing.id, payload);
       toast.success(`${form.firstName} updated successfully`);
     } else {
-      if (!addEmployee(form)) return toast.error('Username already exists');
+      if (!addEmployee(payload)) return toast.error('Username already exists');
       toast.success(`${form.firstName} added successfully`);
     }
     setShowForm(false);
   };
 
+  const list = employees.filter(e => (e.employment || 'coworker') === (tab === 'shared' ? 'shared' : 'coworker'));
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-heading font-bold">Employees</h2>
-        <button onClick={openAdd} className="flex items-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:opacity-90">
+        <button onClick={openAdd} className="flex items-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:opacity-90 shadow-md">
           <Plus size={16} /> Add Employee
+        </button>
+      </div>
+
+      <div className="flex flex-wrap gap-4">
+        <button onClick={() => setTab('coworker')} className={`panel-link ${tab === 'coworker' ? 'panel-link-active' : 'panel-link-inactive'}`}>
+          <span className="inline-flex items-center gap-2"><Users size={16} /> Coworkers ({employees.filter(e => (e.employment || 'coworker') === 'coworker').length})</span>
+        </button>
+        <button onClick={() => setTab('shared')} className={`panel-link ${tab === 'shared' ? 'panel-link-active' : 'panel-link-inactive'}`}>
+          <span className="inline-flex items-center gap-2"><Share2 size={16} /> Shared ({employees.filter(e => e.employment === 'shared').length})</span>
         </button>
       </div>
 
@@ -90,6 +116,17 @@ const EmployeesPage: React.FC = () => {
                 {roles.map(r => <option key={r.key} value={r.key}>{r.label}</option>)}
               </select>
             </div>
+            <div>
+              <label className="text-sm font-medium">Type</label>
+              <select value={form.employment} onChange={e => setForm({ ...form, employment: e.target.value as EmploymentType })} className="mt-1 w-full px-3 py-2.5 bg-secondary rounded-lg text-sm border border-border outline-none">
+                <option value="coworker">Coworker (salary)</option>
+                <option value="shared">Shared (no salary)</option>
+              </select>
+            </div>
+            <div>
+              <label className="text-sm font-medium">Salary (ETB)</label>
+              <input type="number" disabled={form.employment === 'shared'} value={form.employment === 'shared' ? '' : form.salary} onChange={e => setForm({ ...form, salary: e.target.value })} placeholder={form.employment === 'shared' ? 'No salary — shared' : '0'} className="mt-1 w-full px-3 py-2.5 bg-secondary rounded-lg text-sm border border-border outline-none disabled:opacity-50" />
+            </div>
             <div className="md:col-span-2">
               <label className="text-sm font-medium">Profile picture</label>
               <input type="file" accept="image/*" onChange={e => onPic(e.target.files?.[0])} className="mt-1 w-full px-3 py-2 bg-secondary rounded-lg text-sm border border-border" />
@@ -103,38 +140,42 @@ const EmployeesPage: React.FC = () => {
       <div className="table-container overflow-x-auto">
         <table className="w-full text-sm">
           <thead><tr className="border-b border-border bg-secondary/50">
-            <th className="text-left px-4 py-3 font-medium text-muted-foreground">Photo</th>
+            <th className="text-left px-4 py-3 font-medium text-muted-foreground">Profile</th>
             <th className="text-left px-4 py-3 font-medium text-muted-foreground">Name</th>
-            <th className="text-left px-4 py-3 font-medium text-muted-foreground">Role</th>
-            <th className="text-left px-4 py-3 font-medium text-muted-foreground">Phone</th>
+            <th className="text-left px-4 py-3 font-medium text-muted-foreground">Last name</th>
             <th className="text-left px-4 py-3 font-medium text-muted-foreground">Username</th>
+            <th className="text-left px-4 py-3 font-medium text-muted-foreground">Phone</th>
             <th className="text-left px-4 py-3 font-medium text-muted-foreground">Password</th>
+            <th className="text-left px-4 py-3 font-medium text-muted-foreground">Salary</th>
+            <th className="text-left px-4 py-3 font-medium text-muted-foreground">Role</th>
             <th className="text-left px-4 py-3 font-medium text-muted-foreground">Status</th>
           </tr></thead>
           <tbody>
-            {employees.map(e => (
+            {list.map(e => (
               <tr key={e.id} className="border-b border-border hover:bg-secondary/30">
                 <td className="px-4 py-3">
                   {e.profilePic
                     ? <img src={e.profilePic} alt={`${e.firstName} profile`} className="w-9 h-9 rounded-full object-cover" />
                     : <div className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center text-xs font-bold">{e.firstName[0]}{e.lastName[0]}</div>}
                 </td>
-                <td className="px-4 py-3 font-medium">{e.firstName} {e.lastName}</td>
-                <td className="px-4 py-3 capitalize">{e.role}</td>
-                <td className="px-4 py-3">{e.phone}</td>
+                <td className="px-4 py-3 font-medium">{e.firstName}</td>
+                <td className="px-4 py-3">{e.lastName}</td>
                 <td className="px-4 py-3">{e.username}</td>
+                <td className="px-4 py-3">{e.phone}</td>
                 <td className="px-4 py-3 text-muted-foreground">{e.password}</td>
+                <td className="px-4 py-3">{e.employment === 'shared' ? <span className="text-muted-foreground text-xs">No salary (shared)</span> : `${(e.salary || 0).toLocaleString()} ETB`}</td>
+                <td className="px-4 py-3 capitalize">{e.role}</td>
                 <td className="px-4 py-3">
                   <div className="flex gap-2">
-                    <button onClick={() => openEdit(e)} className="p-1.5 rounded-md hover:bg-secondary"><Pencil size={14} /></button>
-                    <button onClick={() => setConfirmDelete(e)} className="p-1.5 rounded-md hover:bg-destructive/10 text-destructive"><Trash2 size={14} /></button>
+                    <button onClick={() => openEdit(e)} aria-label="Edit employee" className="p-1.5 rounded-md hover:bg-secondary"><Pencil size={14} /></button>
+                    <button onClick={() => setConfirmDelete(e)} aria-label="Delete employee" className="p-1.5 rounded-md hover:bg-destructive/10 text-destructive"><Trash2 size={14} /></button>
                   </div>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-        {employees.length === 0 && <div className="p-8 text-center text-muted-foreground text-sm">No employees yet</div>}
+        {list.length === 0 && <div className="p-8 text-center text-muted-foreground text-sm">No {tab === 'shared' ? 'shared users' : 'coworkers'} yet</div>}
       </div>
 
       {confirmDelete && (
