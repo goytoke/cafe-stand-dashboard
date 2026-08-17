@@ -19,6 +19,8 @@ import ReportPage from "@/pages/ReportPage";
 import FinancePage from "@/pages/FinancePage";
 import NotesPage from "@/pages/NotesPage";
 import EditProfilePage from "@/pages/EditProfilePage";
+import EmployeesPage from "@/pages/EmployeesPage";
+
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
