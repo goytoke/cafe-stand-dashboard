@@ -12,9 +12,14 @@ export interface User {
   role: AppRole;
 }
 
+export type EmploymentType = 'coworker' | 'shared';
+
 export interface Employee extends User {
   password: string;
+  employment: EmploymentType;
+  salary?: number;
 }
+
 
 interface AuthContextType {
   user: User | null;
@@ -45,8 +50,11 @@ const defaultEmployees: Employee[] = [
     password: 'Abilo@1234',
     phone: '+251911223344',
     role: 'staff',
+    employment: 'coworker',
+    salary: 6000,
   },
 ];
+
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(() => {

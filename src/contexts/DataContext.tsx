@@ -91,6 +91,19 @@ export interface TodoItem {
   done: boolean;
 }
 
+export interface Takeout {
+  id: string;
+  materialId: string;
+  materialName: string;
+  amount: number;
+  measurement: string;
+  value: number;
+  date: string;
+  by: string;
+  role: AppRole;
+}
+
+
 const drinkSubs = ['Iced Drink', 'Frappe', 'Mojito'];
 const foodSubs = ['Western Food', 'Fast Food'];
 const snackSubs = ['Fries', 'Other'];
@@ -194,6 +207,8 @@ interface DataContextType {
   txns: FinanceTxn[];
   notes: Note[];
   todos: TodoItem[];
+  takeouts: Takeout[];
+
   addProduct: (p: Omit<Product, 'id'>) => void;
   updateProduct: (id: string, p: Partial<Product>) => void;
   deleteProduct: (id: string) => void;
