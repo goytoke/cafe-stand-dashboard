@@ -12,9 +12,14 @@ export interface User {
   role: AppRole;
 }
 
+export type EmploymentType = 'coworker' | 'shared';
+
 export interface Employee extends User {
   password: string;
+  employment: EmploymentType;
+  salary?: number;
 }
+
 
 interface AuthContextType {
   user: User | null;
