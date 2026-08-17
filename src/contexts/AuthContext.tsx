@@ -50,8 +50,11 @@ const defaultEmployees: Employee[] = [
     password: 'Abilo@1234',
     phone: '+251911223344',
     role: 'staff',
+    employment: 'coworker',
+    salary: 6000,
   },
 ];
+
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(() => {
