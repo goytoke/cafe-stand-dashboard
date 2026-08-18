@@ -298,6 +298,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [financeConfig, setFinanceConfig] = useState<FinanceConfig>(() => loadOrDefault('cafe_finance_config', defaultConfig));
   const [txns, setTxns] = useState<FinanceTxn[]>(() => loadOrDefault('cafe_finance_txns_v3', defaultTxns));
   const [notes, setNotes] = useState<Note[]>(() => loadOrDefault('cafe_notes', defaultNotes));
+  const [takeouts, setTakeouts] = useState<Takeout[]>(() => loadOrDefault('cafe_takeouts_v2', defaultTakeouts));
+  const [salaryPayments, setSalaryPayments] = useState<SalaryPayment[]>(() => loadOrDefault('cafe_salary_payments_v1', defaultSalaryPayments));
   const [todos, setTodos] = useState<TodoItem[]>(() => loadOrDefault('cafe_todos', defaultTodos));
   const [selectedDate, setSelectedDate] = useState(today);
 
