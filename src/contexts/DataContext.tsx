@@ -384,9 +384,18 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const toggleTodo = (id: string) => setTodos(prev => prev.map(t => t.id === id ? { ...t, done: !t.done } : t));
   const deleteTodo = (id: string) => setTodos(prev => prev.filter(t => t.id !== id));
 
+  useEffect(() => { localStorage.setItem('cafe_takeouts_v2', JSON.stringify(takeouts)); }, [takeouts]);
+  useEffect(() => { localStorage.setItem('cafe_salary_payments_v1', JSON.stringify(salaryPayments)); }, [salaryPayments]);
+
+  const paySalary: DataContextType['paySalary'] = (p) => {
+    setSalaryPayments(prev => [...prev, { ...p, id: crypto.randomUUID(), date: selectedDate, paidBy: currentUserName }]);
+    addExpense({ reason: `Salary payment — ${p.employeeName} (${p.days} days)`, quantity: 1, price: p.amount, date: selectedDate, fund: 'other' });
+  };
+
   return (
     <DataContext.Provider value={{
       products, orders, materials, expenses, financeConfig, txns, notes, todos,
+      takeouts, salaryPayments, paySalary,
       addProduct, updateProduct, deleteProduct,
       addOrder, addMaterial, updateMaterial, deleteMaterial, useMaterial,
       addExpense, updateExpense, deleteExpense,
