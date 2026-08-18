@@ -18,6 +18,8 @@ export interface Employee extends User {
   password: string;
   employment: EmploymentType;
   salary?: number;
+  hireDate?: string;
+  lastPaidDate?: string;
 }
 
 
@@ -41,6 +43,12 @@ export const useAuth = () => {
   return ctx;
 };
 
+const shiftDays = (n: number) => {
+  const d = new Date();
+  d.setDate(d.getDate() + n);
+  return d.toISOString().split('T')[0];
+};
+
 const defaultEmployees: Employee[] = [
   {
     id: 'emp-abilo',
@@ -52,8 +60,34 @@ const defaultEmployees: Employee[] = [
     role: 'staff',
     employment: 'coworker',
     salary: 6000,
+    hireDate: shiftDays(-59),
+    lastPaidDate: shiftDays(-29),
+  },
+  {
+    id: 'emp-hanna',
+    firstName: 'Hanna',
+    lastName: 'Bekele',
+    username: 'Hanna',
+    password: 'Hanna@1234',
+    phone: '+251922334455',
+    role: 'staff',
+    employment: 'coworker',
+    salary: 4500,
+    hireDate: shiftDays(-18),
+  },
+  {
+    id: 'emp-samuel',
+    firstName: 'Samuel',
+    lastName: 'Girma',
+    username: 'Samuel',
+    password: 'Samuel@1234',
+    phone: '+251933445566',
+    role: 'shareholder',
+    employment: 'shared',
+    hireDate: shiftDays(-90),
   },
 ];
+
 
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -62,7 +96,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return saved ? JSON.parse(saved) : null;
   });
   const [employees, setEmployees] = useState<Employee[]>(() => {
-    const saved = localStorage.getItem('cafe_employees');
+    const saved = localStorage.getItem('cafe_employees_v2');
     return saved ? JSON.parse(saved) : defaultEmployees;
   });
 
@@ -72,7 +106,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [user]);
 
   useEffect(() => {
-    localStorage.setItem('cafe_employees', JSON.stringify(employees));
+    localStorage.setItem('cafe_employees_v2', JSON.stringify(employees));
   }, [employees]);
 
   const login = (username: string, password: string) => {

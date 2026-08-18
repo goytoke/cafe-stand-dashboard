@@ -103,6 +103,21 @@ export interface Takeout {
   role: AppRole;
 }
 
+export interface SalaryPayment {
+  id: string;
+  employeeId: string;
+  employeeName: string;
+  username: string;
+  salary: number;
+  days: number;
+  amount: number;
+  periodFrom: string;
+  date: string;
+  paidBy: string;
+}
+
+
+
 
 const drinkSubs = ['Iced Drink', 'Frappe', 'Mojito'];
 const foodSubs = ['Western Food', 'Fast Food'];
@@ -198,6 +213,16 @@ const defaultTodos: TodoItem[] = [
   { id: '1', title: 'Order milk supply', noteId: '1', dueDate: addDays(2), done: false },
 ];
 
+const defaultTakeouts: Takeout[] = [
+  { id: '1', materialId: '2', materialName: 'Milk', amount: 4, measurement: 'liter', value: 260, date: today, by: 'Abilo', role: 'staff' },
+  { id: '2', materialId: '1', materialName: 'Coffee Beans', amount: 2, measurement: 'kg', value: 1600, date: today, by: 'Admin', role: 'admin' },
+  { id: '3', materialId: '5', materialName: 'Potato', amount: 6, measurement: 'kg', value: 300, date: addDays(-1), by: 'Hanna', role: 'staff' },
+];
+
+const defaultSalaryPayments: SalaryPayment[] = [
+  { id: '1', employeeId: 'emp-abilo', employeeName: 'Abilo Tesfaye', username: 'Abilo', salary: 6000, days: 30, amount: 6000, periodFrom: addDays(-59), date: addDays(-29), paidBy: 'Admin' },
+];
+
 interface DataContextType {
   products: Product[];
   orders: Order[];
@@ -208,6 +233,10 @@ interface DataContextType {
   notes: Note[];
   todos: TodoItem[];
   takeouts: Takeout[];
+  salaryPayments: SalaryPayment[];
+  paySalary: (p: Omit<SalaryPayment, 'id' | 'date' | 'paidBy'>) => void;
+
+
 
   addProduct: (p: Omit<Product, 'id'>) => void;
   updateProduct: (id: string, p: Partial<Product>) => void;
@@ -269,6 +298,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [financeConfig, setFinanceConfig] = useState<FinanceConfig>(() => loadOrDefault('cafe_finance_config', defaultConfig));
   const [txns, setTxns] = useState<FinanceTxn[]>(() => loadOrDefault('cafe_finance_txns_v3', defaultTxns));
   const [notes, setNotes] = useState<Note[]>(() => loadOrDefault('cafe_notes', defaultNotes));
+  const [takeouts, setTakeouts] = useState<Takeout[]>(() => loadOrDefault('cafe_takeouts_v2', defaultTakeouts));
+  const [salaryPayments, setSalaryPayments] = useState<SalaryPayment[]>(() => loadOrDefault('cafe_salary_payments_v1', defaultSalaryPayments));
   const [todos, setTodos] = useState<TodoItem[]>(() => loadOrDefault('cafe_todos', defaultTodos));
   const [selectedDate, setSelectedDate] = useState(today);
 
@@ -353,9 +384,18 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const toggleTodo = (id: string) => setTodos(prev => prev.map(t => t.id === id ? { ...t, done: !t.done } : t));
   const deleteTodo = (id: string) => setTodos(prev => prev.filter(t => t.id !== id));
 
+  useEffect(() => { localStorage.setItem('cafe_takeouts_v2', JSON.stringify(takeouts)); }, [takeouts]);
+  useEffect(() => { localStorage.setItem('cafe_salary_payments_v1', JSON.stringify(salaryPayments)); }, [salaryPayments]);
+
+  const paySalary: DataContextType['paySalary'] = (p) => {
+    setSalaryPayments(prev => [...prev, { ...p, id: crypto.randomUUID(), date: selectedDate, paidBy: currentUserName }]);
+    addExpense({ reason: `Salary payment — ${p.employeeName} (${p.days} days)`, quantity: 1, price: p.amount, date: selectedDate, fund: 'other' });
+  };
+
   return (
     <DataContext.Provider value={{
       products, orders, materials, expenses, financeConfig, txns, notes, todos,
+      takeouts, salaryPayments, paySalary,
       addProduct, updateProduct, deleteProduct,
       addOrder, addMaterial, updateMaterial, deleteMaterial, useMaterial,
       addExpense, updateExpense, deleteExpense,
