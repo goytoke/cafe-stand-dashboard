@@ -96,7 +96,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return saved ? JSON.parse(saved) : null;
   });
   const [employees, setEmployees] = useState<Employee[]>(() => {
-    const saved = localStorage.getItem('cafe_employees');
+    const saved = localStorage.getItem('cafe_employees_v2');
     return saved ? JSON.parse(saved) : defaultEmployees;
   });
 
@@ -106,7 +106,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [user]);
 
   useEffect(() => {
-    localStorage.setItem('cafe_employees', JSON.stringify(employees));
+    localStorage.setItem('cafe_employees_v2', JSON.stringify(employees));
   }, [employees]);
 
   const login = (username: string, password: string) => {
