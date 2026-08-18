@@ -103,6 +103,21 @@ export interface Takeout {
   role: AppRole;
 }
 
+export interface SalaryPayment {
+  id: string;
+  employeeId: string;
+  employeeName: string;
+  username: string;
+  salary: number;
+  days: number;
+  amount: number;
+  periodFrom: string;
+  date: string;
+  paidBy: string;
+}
+
+
+
 
 const drinkSubs = ['Iced Drink', 'Frappe', 'Mojito'];
 const foodSubs = ['Western Food', 'Fast Food'];
