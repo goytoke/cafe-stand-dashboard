@@ -213,6 +213,16 @@ const defaultTodos: TodoItem[] = [
   { id: '1', title: 'Order milk supply', noteId: '1', dueDate: addDays(2), done: false },
 ];
 
+const defaultTakeouts: Takeout[] = [
+  { id: '1', materialId: '2', materialName: 'Milk', amount: 4, measurement: 'liter', value: 260, date: today, by: 'Abilo', role: 'staff' },
+  { id: '2', materialId: '1', materialName: 'Coffee Beans', amount: 2, measurement: 'kg', value: 1600, date: today, by: 'Admin', role: 'admin' },
+  { id: '3', materialId: '5', materialName: 'Potato', amount: 6, measurement: 'kg', value: 300, date: addDays(-1), by: 'Hanna', role: 'staff' },
+];
+
+const defaultSalaryPayments: SalaryPayment[] = [
+  { id: '1', employeeId: 'emp-abilo', employeeName: 'Abilo Tesfaye', username: 'Abilo', salary: 6000, days: 30, amount: 6000, periodFrom: addDays(-59), date: addDays(-29), paidBy: 'Admin' },
+];
+
 interface DataContextType {
   products: Product[];
   orders: Order[];
@@ -223,6 +233,10 @@ interface DataContextType {
   notes: Note[];
   todos: TodoItem[];
   takeouts: Takeout[];
+  salaryPayments: SalaryPayment[];
+  paySalary: (p: Omit<SalaryPayment, 'id' | 'date' | 'paidBy'>) => void;
+
+
 
   addProduct: (p: Omit<Product, 'id'>) => void;
   updateProduct: (id: string, p: Partial<Product>) => void;
